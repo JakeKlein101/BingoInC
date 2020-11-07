@@ -30,6 +30,7 @@ void printBoards(bingoGame game);
 int hasWon(bingoPlayer player);
 int generateRandomsNoRepeat(int duplicatesArray[][BOARD_SIZE]);
 int drawNumber(bingoGame* game);
+void gameLoop(void);
 
 
 int generateRandomsNoRepeat(int duplicatesArray[][BOARD_SIZE]) 
@@ -44,6 +45,7 @@ int generateRandomsNoRepeat(int duplicatesArray[][BOARD_SIZE])
 		{
 			if (num == duplicatesArray[i][j])
 			{
+				printf("Found Duplicate\n");
 				generateRandomsNoRepeat(duplicatesArray);
 			}
 		}
@@ -211,28 +213,32 @@ int drawNumber(bingoGame* game)
 
 }
 
-int main(void)
+void gameLoop(void)
 {
+
+	bingoGame game = {};
+	bingoGame* pGame = &game;
 	int drawnNumber = 0;
 	int windex = 0;
 	int i = 0;
-	int won = FALSE;
-	bingoGame game = {};
+
+
 	bingoPlayer playerOne = {};
 	bingoPlayer playerTwo = {};
 	bingoPlayer* pPlayerOne = &playerOne;
 	bingoPlayer* pPlayerTwo = &playerTwo;
-	bingoGame* pGame = &game;
+
 	initGame(pGame, PLAYERS);
 	for (i = 0; i < pGame->numPlayers; i++)
 	{
 		initBingoPlayer(&(pGame->players[i]));
 	}
 	printBoards(game);
+	int won = FALSE;
 	while (!won)
-	{	
+	{
 		drawnNumber = drawNumber(pGame);
-		printf("The number that was drawn is: %d", drawnNumber);
+		printf("The number that was drawn is: %d\n", drawnNumber);
 		windex = updateGame(pGame, drawnNumber);
 		if (windex != FALSE)
 		{
@@ -251,4 +257,8 @@ int main(void)
 	}
 	free(pGame->numsDrawn);
 	free(pGame->players);
+}
+int main(void)
+{
+	gameLoop();
 }
