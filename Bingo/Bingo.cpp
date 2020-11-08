@@ -34,7 +34,7 @@ int drawNumber(bingoGame* game);
 void gameLoop(void);
 
 
-int generateRandomsNoRepeat(int duplicatesArray[][BOARD_SIZE]) // REPEATS NUBMER STILL
+int generateRandomsNoRepeat(int duplicatesArray[][BOARD_SIZE]) // still draws duplicates.
 // generates a random number between 1 - 75 that is also not in the 2d array given and returns it.
 {
 	int i = 0, j = 0;
@@ -148,7 +148,7 @@ void initGame(bingoGame* game, int players)
 	game->numsDrawn = (int*)malloc(sizeof(int) * MAX_NUM);
 }
 
-int hasWon(bingoPlayer player) // IDENTIFIES 5 X'S BUT NOT IN A ROW.
+int hasWon(bingoPlayer player) 
 {
 	// checks if player has a row of hits on his board.
 	int i = 0, j = 0, vCounter = 0;
@@ -156,15 +156,19 @@ int hasWon(bingoPlayer player) // IDENTIFIES 5 X'S BUT NOT IN A ROW.
 	{
 		for (j = 0; j < BOARD_SIZE; j++)
 		{
-			if (player.board[j][i] == HIT)
+			if (player.board[i][j] == HIT)
 			{
 				vCounter++;
 			}
+			if (vCounter == 5)
+			{
+				return TRUE;
+			}
 		}
-	}
-	if (vCounter == 5)
-	{
-		return TRUE;
+		if (vCounter < 5)
+		{
+			vCounter = 0;
+		}
 	}
 	return FALSE;
 }
@@ -203,11 +207,10 @@ Output: None
 	}
 }
 
-int drawNumber(bingoGame* game)
+int drawNumber(bingoGame* game) // draws duplicates.
 {
 	int i = 0;
 	int num = 0;
-	
 	num = (rand() % (MAX_NUM - MIN_NUM + 1)) + MIN_NUM;
 	for (i = 0; i < game->numOfNumsDrawn; i++)
 	{
@@ -250,7 +253,7 @@ void gameLoop(void)
 		if (winnerIndex != -1)
 		{
 			won = TRUE;
-			printf("%s has won the game!\n", game.players[winnerIndex].name);
+			printf("\n%s has won the game!\n", game.players[winnerIndex].name);
 			printf("Here are the final boards:\n");
 			printBoards(game);
 		}
@@ -258,7 +261,7 @@ void gameLoop(void)
 		{
 			printf("Here are the boards after the draw!\n");
 			printBoards(game);
-			printf("Press any key to roll another one!\n");
+			// printf("Press any key to roll another one!\n");
 			// getchar();
 		}
 	}
