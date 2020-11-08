@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 #define BOARD_SIZE 5
 #define HIT 'X'
@@ -33,19 +34,20 @@ int drawNumber(bingoGame* game);
 void gameLoop(void);
 
 
-int generateRandomsNoRepeat(int duplicatesArray[][BOARD_SIZE]) 
+int generateRandomsNoRepeat(int duplicatesArray[][BOARD_SIZE]) // REPEATS NUBMER STILL
 // generates a random number between 1 - 75 that is also not in the 2d array given and returns it.
 {
 	int i = 0, j = 0;
 	int num = 0;
-	num = (rand() % (MAX_NUM - MIN_NUM + 1)) + MIN_NUM;
+	num = (rand() % (MAX_NUM - MIN_NUM)) + MIN_NUM;
 	for (i = 0; i < BOARD_SIZE; i++)
 	{
 		for (j = 0; j < BOARD_SIZE; j++)
 		{
+			
+			
 			if (num == duplicatesArray[i][j])
 			{
-				printf("Found Duplicate\n");
 				generateRandomsNoRepeat(duplicatesArray);
 			}
 		}
@@ -146,19 +148,23 @@ void initGame(bingoGame* game, int players)
 	game->numsDrawn = (int*)malloc(sizeof(int) * MAX_NUM);
 }
 
-int hasWon(bingoPlayer player)
+int hasWon(bingoPlayer player) // IDENTIFIES 5 X'S BUT NOT IN A ROW.
 {
 	// checks if player has a row of hits on his board.
-	int i = 0, j = 0;
+	int i = 0, j = 0, vCounter = 0;
 	for (i = 0; i < BOARD_SIZE; i++)
 	{
 		for (j = 0; j < BOARD_SIZE; j++)
 		{
 			if (player.board[j][i] == HIT)
 			{
-				return TRUE;
+				vCounter++;
 			}
 		}
+	}
+	if (vCounter == 5)
+	{
+		return TRUE;
 	}
 	return FALSE;
 }
@@ -179,7 +185,7 @@ int updateGame(bingoGame* game, int num)
 			return i;
 		}
 	}
-	return FALSE;
+	return -1;
 }
 
 void printBoards(bingoGame game)
@@ -201,6 +207,7 @@ int drawNumber(bingoGame* game)
 {
 	int i = 0;
 	int num = 0;
+	
 	num = (rand() % (MAX_NUM - MIN_NUM + 1)) + MIN_NUM;
 	for (i = 0; i < game->numOfNumsDrawn; i++)
 	{
@@ -215,11 +222,11 @@ int drawNumber(bingoGame* game)
 
 void gameLoop(void)
 {
-
+	srand(time(NULL));
 	bingoGame game = {};
 	bingoGame* pGame = &game;
 	int drawnNumber = 0;
-	int windex = 0;
+	int winnerIndex = 0;
 	int i = 0;
 
 
@@ -239,11 +246,11 @@ void gameLoop(void)
 	{
 		drawnNumber = drawNumber(pGame);
 		printf("The number that was drawn is: %d\n", drawnNumber);
-		windex = updateGame(pGame, drawnNumber);
-		if (windex != FALSE)
+		winnerIndex = updateGame(pGame, drawnNumber);
+		if (winnerIndex != -1)
 		{
 			won = TRUE;
-			printf("%s has won the game!\n", game.players[windex].name);
+			printf("%s has won the game!\n", game.players[winnerIndex].name);
 			printf("Here are the final boards:\n");
 			printBoards(game);
 		}
@@ -252,7 +259,7 @@ void gameLoop(void)
 			printf("Here are the boards after the draw!\n");
 			printBoards(game);
 			printf("Press any key to roll another one!\n");
-			getchar();
+			// getchar();
 		}
 	}
 	free(pGame->numsDrawn);
