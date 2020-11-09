@@ -29,42 +29,17 @@ void updatePlayer(bingoPlayer* player, int num);
 void printBoard(bingoPlayer player);
 void printBoards(bingoGame game);
 int hasWon(bingoPlayer player);
-int generateRandomsNoRepeat(int duplicatesArray[][BOARD_SIZE]);
-int drawNumber(bingoGame* game);
+int drawNumber(int numsDrawn[], int len);
 void gameLoop(void);
 
 
-int generateRandomsNoRepeat(int duplicatesArray[][BOARD_SIZE]) // still draws duplicates.
-// generates a random number between 1 - 75 that is also not in the 2d array given and returns it.
-{
-	int i = 0, j = 0;
-	int num = 0;
-	num = (rand() % (MAX_NUM - MIN_NUM)) + MIN_NUM;
-	for (i = 0; i < BOARD_SIZE; i++)
-	{
-		for (j = 0; j < BOARD_SIZE; j++)
-		{
-			
-			
-			if (num == duplicatesArray[i][j])
-			{
-				generateRandomsNoRepeat(duplicatesArray);
-			}
-		}
-	}
-	return num;
-}
-
-void initArr(int arr[][BOARD_SIZE], int len)
+void initArr(int arr[], int len)
 // initiates array to -1.
 {
 	int i = 0, j = 0;
 	for (i = 0; i < len; i++)
 	{
-		for (j = 0; j < len; j++)
-		{
-			arr[i][j] = -1;
-		}
+		arr[i] = -1;
 	}
 }
 
@@ -76,17 +51,17 @@ After that it initiates the player bingo board by putting random numbers in it.
 */
 	int randomizedNum = 0;
 	int i = 0, j = 0;
-	int usedNumbersArray[BOARD_SIZE][BOARD_SIZE];
-	initArr(usedNumbersArray, BOARD_SIZE);
+	int usedNumbersArray[MAX_NUM + 1];
+	initArr(usedNumbersArray, MAX_NUM + 1);
 	printf("What's your name?\n");
 	fgets(pPlayer->name, MAX_NAME_LEN, stdin);
 	for (i = 0; i < 5; i++)
 	{
 		for (j = 0; j < 5; j++)
 		{
-			randomizedNum = generateRandomsNoRepeat(usedNumbersArray);
+			randomizedNum = drawNumber(usedNumbersArray, (BOARD_SIZE * BOARD_SIZE));
 			pPlayer->board[i][j] = randomizedNum;
-			usedNumbersArray[i][j] = randomizedNum;
+			usedNumbersArray[randomizedNum]++;
 		}
 	}
 	printf("done initializing board\n");
@@ -145,7 +120,8 @@ void initGame(bingoGame* game, int players)
 	game->numPlayers = players;
 	game->players = (bingoPlayer*)malloc(sizeof(bingoPlayer) * players);
 	game->numOfNumsDrawn = 0;
-	game->numsDrawn = (int*)malloc(sizeof(int) * MAX_NUM);
+	game->numsDrawn = (int*)malloc(sizeof(int) * (MAX_NUM + 1));
+	initArr(game->numsDrawn, MAX_NUM + 1);
 }
 
 int hasWon(bingoPlayer player) 
@@ -176,7 +152,7 @@ int hasWon(bingoPlayer player)
 int updateGame(bingoGame* game, int num)
 {
 	int i = 0;
-	game->numsDrawn[game->numOfNumsDrawn] = num;
+	game->numsDrawn[num]++;
 	game->numOfNumsDrawn++;
 	for (i = 0; i < game->numPlayers; i++)
 	{
@@ -207,20 +183,22 @@ Output: None
 	}
 }
 
-int drawNumber(bingoGame* game) // draws duplicates.
+int drawNumber(int numsDrawn[], int len) 
+// draws random numbers that their index in the given list has value -1. 
 {
+	
 	int i = 0;
 	int num = 0;
-	num = (rand() % (MAX_NUM - MIN_NUM + 1)) + MIN_NUM;
-	for (i = 0; i < game->numOfNumsDrawn; i++)
+	int duplicate = TRUE;
+	while (duplicate)
 	{
-		if (game->numsDrawn[i] == num)
+		num = (rand() % (MAX_NUM - MIN_NUM + 1)) + MIN_NUM;	
+		if (numsDrawn[num] == -1)
 		{
-			drawNumber(game);
+			duplicate = FALSE;
 		}
 	}
 	return num;
-
 }
 
 void gameLoop(void)
@@ -247,7 +225,7 @@ void gameLoop(void)
 	int won = FALSE;
 	while (!won)
 	{
-		drawnNumber = drawNumber(pGame);
+		drawnNumber = drawNumber(pGame->numsDrawn, pGame->numOfNumsDrawn);
 		printf("The number that was drawn is: %d\n", drawnNumber);
 		winnerIndex = updateGame(pGame, drawnNumber);
 		if (winnerIndex != -1)
@@ -261,8 +239,8 @@ void gameLoop(void)
 		{
 			printf("Here are the boards after the draw!\n");
 			printBoards(game);
-			// printf("Press any key to roll another one!\n");
-			// getchar();
+			printf("Press any key to roll another one!\n");
+			getchar();
 		}
 	}
 	free(pGame->numsDrawn);
